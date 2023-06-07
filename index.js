@@ -26,12 +26,29 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-  
-     // server link start
-     const serverCollection = client.db('dbAssignment12').collection('cltAssignment12');
-     // server link end 
+
+    // server link start
+    const serverCollection = client.db('dbAssignment12').collection('cltAssignment12');
+    const usersCollection = client.db('dbAssignment12').collection('users');
+    // server link end 
 
 
+    // user information post dataBD start 
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+
+      // // google sign up part start
+      // const query = { email: user.email }
+      // const existingUser = await usersCollection.findOne(query);
+      // if (existingUser) {
+      //   return res.send({ message: 'user already exists' })
+      // }
+      // // google sign up part start
+
+      const result = await usersCollection.insertOne(user)
+      res.send(result);
+    });
+    // user information post dataBD exit
 
 
     // Send a ping to confirm a successful connection
@@ -45,10 +62,10 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-     res.send('Assignment12 server running')
+  res.send('Assignment12 server running')
 })
 
 app.listen(port, () => {
-     console.log(`server is running on port: ${port}`);
+  console.log(`server is running on port: ${port}`);
 })
 
