@@ -134,6 +134,19 @@ async function run() {
     })
     // user admin role added exit
 
+    // user Instructors role added start
+    app.patch('/users/Instructors/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: 'Instructors'
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+    // user Instructors role added exit
 
 
     // Send a ping to confirm a successful connection
