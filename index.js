@@ -84,6 +84,14 @@ async function run() {
       next();
     }
 
+    // class added post mongoDB start
+    app.post('/class', async (req, res) => {
+      const newAdd = req.body;
+      const result = await serverCollection.insertOne(newAdd)
+      res.send(result);
+    });
+    // class added post mongoDB end
+
     // user information post dataBD start 
     app.post('/users', async (req, res) => {
       const user = req.body;
@@ -128,7 +136,7 @@ async function run() {
       // jwt verifyJwt start
       const decodedEmail = req.decoded.email;
       if (email !== decodedEmail) {
-           return res.status(403).send({ error: true, message: 'forbidden access' })
+        return res.status(403).send({ error: true, message: 'forbidden access' })
       }
       // jwt verifyJwt end
 
@@ -150,7 +158,7 @@ async function run() {
       // jwt verifyJwt start
       const decodedEmail = req.decoded.email;
       if (email !== decodedEmail) {
-           return res.status(403).send({ error: true, message: 'forbidden access' })
+        return res.status(403).send({ error: true, message: 'forbidden access' })
       }
       // jwt verifyJwt end
 
