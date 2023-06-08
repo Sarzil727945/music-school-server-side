@@ -92,6 +92,14 @@ async function run() {
     });
     // class added post mongoDB end
 
+    // class data get start 
+      app.get('/class', async (req, res) => {
+        const cursor = serverCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+   })
+   // class all data get end 
+
     // user information post dataBD start 
     app.post('/users', async (req, res) => {
       const user = req.body;
