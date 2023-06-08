@@ -73,6 +73,17 @@ async function run() {
       next();
     }
 
+    // Warning: use verifyJWT before using verifyInstructors
+    const verifyInstructors = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email }
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== 'Instructors') {
+        return res.status(403).send({ error: true, message: 'forbidden message' });
+      }
+      next();
+    }
+
     // user information post dataBD start 
     app.post('/users', async (req, res) => {
       const user = req.body;
@@ -92,6 +103,14 @@ async function run() {
 
     // user information get start
     app.get('/users', verifyJwt, verifyAdmin, async (req, res) => {
+      const cursor = usersCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+    // user information get end
+
+    // user information get start
+    app.get('/users', verifyJwt, verifyInstructors, async (req, res) => {
       const cursor = usersCollection.find();
       const result = await cursor.toArray();
       res.send(result);
@@ -119,6 +138,28 @@ async function run() {
       res.send(result);
     })
     // user admin check end
+
+    // user Instructors check start
+    app.get('/users/Instructors/:email', verifyJwt, async (req, res) => {
+      const email = req.params.email;
+
+      if (req.decoded.email !== email) {
+        res.send({ Instructors: false })
+      }
+
+      // jwt verifyJwt start
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+           return res.status(403).send({ error: true, message: 'forbidden access' })
+      }
+      // jwt verifyJwt end
+
+      const query = { email: email }
+      const user = await usersCollection.findOne(query);
+      const result = { Instructors: user?.role === 'Instructors' }
+      res.send(result);
+    })
+    // user Instructors check end
 
     // user admin role added start
     app.patch('/users/admin/:id', async (req, res) => {
