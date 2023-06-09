@@ -49,6 +49,7 @@ async function run() {
 
     // server link start
     const serverCollection = client.db('dbAssignment12').collection('cltAssignment12');
+    const selectedCollection = client.db('dbAssignment12').collection('selected');
     const usersCollection = client.db('dbAssignment12').collection('users');
     // server link end 
 
@@ -91,6 +92,25 @@ async function run() {
       res.send(result);
     });
     // class added post mongoDB end
+
+    // selected data added post mongoDB start
+    app.post('/selected', async (req, res) => {
+      const newAdd = req.body;
+      const result = await selectedCollection.insertOne(newAdd)
+      res.send(result);
+    });
+    // selected data added post mongoDB end
+
+    // selected data added get mongoDB start
+    app.get('/selected', async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email }
+      }
+      const result = await selectedCollection.find(query).toArray();
+      res.send(result);
+    })
+    // selected data added get mongoDB end
 
     // get data server start
     app.get('/class', async (req, res) => {
@@ -136,6 +156,14 @@ async function run() {
       res.send(result);
     });
     // user information post dataBD exit
+
+    // All user information get start
+    app.get('/users', async (req, res) => {
+      const cursor = usersCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+    // All user information get end
 
     // user information get start
     app.get('/users', verifyJwt, verifyAdmin, async (req, res) => {
