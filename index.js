@@ -92,13 +92,33 @@ async function run() {
     });
     // class added post mongoDB end
 
-    // class data get start 
-      app.get('/class', async (req, res) => {
-        const cursor = serverCollection.find();
-        const result = await cursor.toArray();
-        res.send(result);
-   })
-   // class all data get end 
+    // get data server start
+    app.get('/class', async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email }
+      }
+      const result = await serverCollection.find(query).toArray();
+      res.send(result);
+    })
+    //  get data server end 
+
+
+    //  class data patch start 
+    app.patch('/class/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const updatedClasses = req.body;
+
+      const updateDoc = {
+        $set: {
+          status: updatedClasses.status
+        }
+      }
+      const result = await serverCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+    //  class data patch end
 
     // user information post dataBD start 
     app.post('/users', async (req, res) => {
@@ -131,7 +151,6 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     })
-    // user information get end
 
     // user admin check start
     app.get('/users/admin/:email', verifyJwt, async (req, res) => {
