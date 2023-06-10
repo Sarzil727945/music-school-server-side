@@ -11,7 +11,6 @@ app.use(cors());
 app.use(express.json());
 
 
-
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.2a9l2qr.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -85,6 +84,7 @@ async function run() {
       next();
     }
 
+
     // class added post mongoDB start
     app.post('/class', async (req, res) => {
       const newAdd = req.body;
@@ -92,6 +92,34 @@ async function run() {
       res.send(result);
     });
     // class added post mongoDB end
+
+    // get class data server start
+    app.get('/class', async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email }
+      }
+      const result = await serverCollection.find(query).toArray();
+      res.send(result);
+    })
+    //  get class data server end 
+
+    //  class data patch start 
+    app.patch('/class/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const updatedClasses = req.body;
+
+      const updateDoc = {
+        $set: {
+          status: updatedClasses.status
+        }
+      }
+      const result = await serverCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+    //  class data patch end
+
 
     // selected data added post mongoDB start
     app.post('/selected', async (req, res) => {
@@ -112,35 +140,17 @@ async function run() {
     })
     // selected data added get mongoDB end
 
-    // get data server start
-    app.get('/class', async (req, res) => {
-      let query = {};
-      if (req.query?.email) {
-        query = { email: req.query.email }
-      }
-      const result = await serverCollection.find(query).toArray();
+    // selected data delete mongoDB start
+    app.delete('/selected/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await selectedCollection.deleteOne(query);
       res.send(result);
     })
-    //  get data server end 
+    // selected data delete mongoDB  exit
 
 
-    //  class data patch start 
-    app.patch('/class/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) }
-      const updatedClasses = req.body;
-
-      const updateDoc = {
-        $set: {
-          status: updatedClasses.status
-        }
-      }
-      const result = await serverCollection.updateOne(filter, updateDoc)
-      res.send(result)
-    })
-    //  class data patch end
-
-    // user information post dataBD start 
+    // user data post dataBD start 
     app.post('/users', async (req, res) => {
       const user = req.body;
 
@@ -155,31 +165,40 @@ async function run() {
       const result = await usersCollection.insertOne(user)
       res.send(result);
     });
-    // user information post dataBD exit
+    // user data post dataBD exit
 
-
-    // All user information get start
+    // All user data get start
     app.get('/users', async (req, res) => {
       const cursor = usersCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     })
-    // All user information get end
+    // All user data get end
 
-    // user information get start
+    // user data delete mongoDB start
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    })
+    // user data delete mongoDB  exit
+
+    // admin user information get  start
     app.get('/users', verifyJwt, verifyAdmin, async (req, res) => {
       const cursor = usersCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     })
-    // user information get end
+    // admin user information get end
 
-    // user information get start
+    // instructor user information get start
     app.get('/users', verifyJwt, verifyInstructors, async (req, res) => {
       const cursor = usersCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     })
+    // instructor user information get end
 
     // user admin check start
     app.get('/users/admin/:email', verifyJwt, async (req, res) => {
