@@ -86,7 +86,15 @@ async function run() {
 
 
     // class added post mongoDB start
-    app.post('/class', async (req, res) => {
+    app.post('/class', verifyAdmin, async (req, res) => {
+      const newAdd = req.body;
+      const result = await serverCollection.insertOne(newAdd)
+      res.send(result);
+    });
+    // class added post mongoDB end
+
+    // class added post mongoDB start
+    app.post('/class', verifyInstructors, async (req, res) => {
       const newAdd = req.body;
       const result = await serverCollection.insertOne(newAdd)
       res.send(result);
@@ -167,16 +175,8 @@ async function run() {
     });
     // user data post dataBD exit
 
-    // All user data get start
-    app.get('/users', async (req, res) => {
-      const cursor = usersCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    })
-    // All user data get end
-
     // user data delete mongoDB start
-    app.delete('/users/:id', async (req, res) => {
+    app.delete('/users/:id', verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await usersCollection.deleteOne(query);
@@ -191,14 +191,6 @@ async function run() {
       res.send(result);
     })
     // admin user information get end
-
-    // instructor user information get start
-    app.get('/users', verifyJwt, verifyInstructors, async (req, res) => {
-      const cursor = usersCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    })
-    // instructor user information get end
 
     // user admin check start
     app.get('/users/admin/:email', verifyJwt, async (req, res) => {
