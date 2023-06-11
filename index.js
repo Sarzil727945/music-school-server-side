@@ -1,10 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 // // jwt
 const jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 5000;
-require('dotenv').config();
 
 // middleware 
 app.use(cors());
@@ -56,7 +56,7 @@ async function run() {
     app.post('/jwt', (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: '2h'
+        expiresIn: '1d'
       });
       res.send({ token });
     })
@@ -84,17 +84,8 @@ async function run() {
       next();
     }
 
-
     // class added post mongoDB start
-    app.post('/class', verifyAdmin, async (req, res) => {
-      const newAdd = req.body;
-      const result = await serverCollection.insertOne(newAdd)
-      res.send(result);
-    });
-    // class added post mongoDB end
-
-    // class added post mongoDB start
-    app.post('/class', verifyInstructors, async (req, res) => {
+    app.post('/class', verifyJwt, verifyInstructors, async (req, res) => {
       const newAdd = req.body;
       const result = await serverCollection.insertOne(newAdd)
       res.send(result);
@@ -176,7 +167,7 @@ async function run() {
     // user data post dataBD exit
 
     // user data delete mongoDB start
-    app.delete('/users/:id', verifyAdmin, async (req, res) => {
+    app.delete('/users/:id', verifyJwt, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await usersCollection.deleteOne(query);
@@ -185,7 +176,7 @@ async function run() {
     // user data delete mongoDB  exit
 
     // admin user information get  start
-    app.get('/users', verifyJwt, verifyAdmin, async (req, res) => {
+    app.get('/users', async (req, res) => {
       const cursor = usersCollection.find();
       const result = await cursor.toArray();
       res.send(result);
