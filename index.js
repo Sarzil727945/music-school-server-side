@@ -156,7 +156,6 @@ async function run() {
 
     // class order post mongoDB start
     const tran_id = new ObjectId().toString();
-
     app.post('/order', async (req, res) => {
       const order = req.body
       const product = await selectedCollection.findOne({
@@ -204,7 +203,7 @@ async function run() {
           paidStatus: false,
           tranjectionId: tran_id,
         };
-        const result =  ordersCollection.insertOne(finalOrder)
+        const result = ordersCollection.insertOne(finalOrder)
 
         console.log('Redirecting to: ', GatewayPageURL)
       });
@@ -212,7 +211,7 @@ async function run() {
       app.post('/payment/success/:tranId', async (req, res) => {
         console.log(req.params.tranId);
         const result = await ordersCollection.updateOne(
-          {tranjectionId: req.params.tranId},
+          { tranjectionId: req.params.tranId },
           {
             $set: {
               paidStatus: true,
@@ -221,16 +220,16 @@ async function run() {
         );
         if (result.modifiedCount > 0) {
           res.redirect(
-            `http://localhost:5173/dashboard/enrolledClass/${req.params.tranId}`
+            `http://localhost:5173/dashboard/success/${req.params.tranId}`
           )
         }
       })
       app.post('/payment/fail/:tranId', async (req, res) => {
         console.log(req.params.tranId);
         const result = await ordersCollection.deleteOne({
-            tranjectionId: req.params.tranId,
-          });
-        if (result.modifiedCount) {
+          tranjectionId: req.params.tranId,
+        });
+        if (result.modifiedCount > 0) {
           res.redirect(
             `http://localhost:5173/dashboard/fail/${req.params.tranId}`
           )
@@ -238,8 +237,18 @@ async function run() {
       })
 
     });
-
     // class order post mongoDB end
+
+    // class order data  get mongoDB start
+    app.get('/order', async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email }
+      }
+      const result = await ordersCollection.find(query).toArray();
+      res.send(result);
+    })
+    // class order data get mongoDB end
 
     // user data post dataBD start 
     app.post('/users', async (req, res) => {
