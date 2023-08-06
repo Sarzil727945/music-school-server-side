@@ -166,8 +166,8 @@ async function run() {
         total_amount: product?.price,
         currency: order?.category,
         tran_id: tran_id, // use unique tran_id for each api call
-        success_url: `https://assignment12-server-site.vercel.app/payment/success/${tran_id}`,
-        fail_url: `https://assignment12-server-site.vercel.app/payment/fail/${tran_id}`,
+        success_url: `https://assignment12-server-site.vercel.app/dashboard/success/${tran_id}`,
+        fail_url: `https://assignment12-server-site.vercel.app/dashboard/fail/${tran_id}`,
         cancel_url: 'http://localhost:3030/cancel',
         ipn_url: 'http://localhost:3030/ipn',
         shipping_method: 'Courier',
@@ -208,7 +208,7 @@ async function run() {
         console.log('Redirecting to: ', GatewayPageURL)
       });
 
-      app.post('/payment/success/:tranId', async (req, res) => {
+      app.post('/dashboard/success/:tranId', async (req, res) => {
         console.log(req.params.tranId);
         const result = await ordersCollection.updateOne(
           { tranjectionId: req.params.tranId },
@@ -220,18 +220,18 @@ async function run() {
         );
         if (result.modifiedCount > 0) {
           res.redirect(
-            `http://localhost:5173/dashboard/success/${req.params.tranId}`
+            `https://musics-school.netlify.app/dashboard/success/${req.params.tranId}`
           )
         }
       })
-      app.post('/payment/fail/:tranId', async (req, res) => {
+      app.post('/dashboard/fail/:tranId', async (req, res) => {
         console.log(req.params.tranId);
         const result = await ordersCollection.deleteOne({
           tranjectionId: req.params.tranId,
         });
         if (result.modifiedCount > 0) {
           res.redirect(
-            `http://localhost:5173/dashboard/fail/${req.params.tranId}`
+            `https://musics-school.netlify.app/dashboard/fail/${req.params.tranId}`
           )
         }
       })
